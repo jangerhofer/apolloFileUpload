@@ -6,10 +6,13 @@ This demo uses [Apollo Server](http://docs.apollostack.com/apollo-server/) and [
 ## Usage
   - After installing the dependencies, run `npm run build` to do a quick Babel compile.
   - `npm start` will start the Express+GraphQL server.
-  - Post to `localhost:3000` with something along the lines of these fields:
+  - Post to `localhost:3000` with something along the lines of these post body key/value pairs:
     - `query` : `mutation newFile($fileName : String) {   uploadFile(fileSaveName : $fileName) { originalname, mimetype}}`
     - `operationName` : `newFile`
     - `variables` : `{"fileName": "SaveNameForNewFile"}`
     - `file` : Attach a file to be uploaded.
     This is most easily done using a "REST Client" like [Postman](https://www.getpostman.com/).
   - The file will be saved in the project root directory under whatever filename is provided in the variable "fileName".
+
+#### Example Postman request.
+![An example request.](/exampleRequest.png)
