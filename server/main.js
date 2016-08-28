@@ -1,11 +1,11 @@
+import { Meteor } from 'meteor/meteor';
+import { WebApp } from 'meteor/webapp';
 import { apolloExpress, graphiqlExpress } from 'apollo-server';
 import { makeExecutableSchema } from 'graphql-tools';
-import multer from 'multer';
 import express from 'express';
+import multer from 'multer';
 import bodyParser from 'body-parser';
-import fs from 'fs';
 
-// Create schema
 const typeDefs = `
 type fileMetadata {
   originalname : String
@@ -33,11 +33,10 @@ schema {
 
 const resolvers = {
   RootMutation: {
-    uploadFile: (root, args, context) => {
-            // Do something with root.file.buffer here
-            // e.g. fs.writeFile(args.fileSaveName, root.file.buffer)
-
-            // Return file metdata
+    uploadFile: (root, args) => {
+      // Do something with root.file.buffer here
+      // e.g. fs.writeFile(args.fileSaveName, root.file.buffer)
+      console.log('Query arguments:', args);
       return root.file;
     },
   },
@@ -48,24 +47,22 @@ const schema = makeExecutableSchema({
   resolvers,
 });
 
-var app = express();
-app.use(bodyParser.json());
+let graphQLServer = express();
 
 // Configure multer to accept a single file per post
 const storage = multer.memoryStorage();
-app.use(multer({
+graphQLServer.use(multer({
   storage,
 }).single('file'));
 
-app.use('/graphql', apolloExpress((req) => {
-  return {
-    schema,
-    rootValue: req,
-  };
-}));
+graphQLServer.use('/graphql', bodyParser.json(), apolloExpress((req) => ({
+  schema,
+  rootValue: req,
+})
+));
 
-app.use('/graphiql', graphiqlExpress({
+graphQLServer.use('/graphiql', graphiqlExpress({
   endpointURL: '/graphql',
 }));
 
-app.listen(3000);
+WebApp.connectHandlers.use(Meteor.bindEnvironment(graphQLServer));
