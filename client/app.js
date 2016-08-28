@@ -8,6 +8,13 @@ class App extends Component {
 
   fileHandler(e) {
     console.log('File to upload: ', e.target.files[0]);
+    var reader = new FileReader();
+    reader.readAsDataURL(e.target.files[0]);
+    const someVar = this;
+    reader.addEventListener('load', function () {
+      let encodedFile = reader.result;
+      someVar.props.mutate({ variables: { fileName: 'NOT A TEST', encoding: encodedFile } });
+    }, false);
   }
 
   render() {
@@ -17,11 +24,10 @@ class App extends Component {
         <hr />
         <form>
         <FileInput
-          name="myImage"
-          accept="*"
+          name="fileUpload"
+          accept=".png"
           placeholder="Upload File"
-          className="inputClass"
-          onChange={this.fileHandler}
+          onChange={this.fileHandler.bind(this)}
         />
       </form>
       </div>
@@ -35,7 +41,17 @@ const GET_NUM = gql`
   }
 `;
 const withNum = graphql(GET_NUM);
-const AppWithData = withNum(App);
+const AppWithNum = withNum(App);
+
+const UPLOAD_FILE = gql`
+  mutation upload($fileName : String, $encoding : String!) {
+    uploadFile(fileSaveName : $fileName, fileBase : $encoding) {
+      size
+    }
+  }
+`;
+const withFileMutation = graphql(UPLOAD_FILE);
+const AppWithData = withFileMutation(AppWithNum);
 
 export default AppWithData;
 

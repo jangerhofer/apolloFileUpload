@@ -5,6 +5,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import express from 'express';
 import multer from 'multer';
 import bodyParser from 'body-parser';
+import fs from 'fs';
 
 const typeDefs = `
 type fileMetadata {
@@ -22,7 +23,7 @@ type Query {
 }
 
 type Mutation {
-  uploadFile(fileSaveName : String) : fileMetadata
+  uploadFile(fileSaveName : String = "test", fileBase : String) : fileMetadata
 }
 
 schema {
@@ -37,10 +38,12 @@ const resolvers = {
   },
   Mutation: {
     uploadFile: (root, args) => {
-      // Do something with root.file.buffer here
-      // e.g. fs.writeFile(args.fileSaveName, root.file.buffer)
-      console.log('Query arguments:', args);
-      return root.file;
+      var base64Data = args.fileBase.replace(/^data:image\/png;base64,/, '');
+
+      fs.writeFile('savedFile.png', base64Data, 'base64', function (err) {
+        console.log(err);
+      });
+      return;
     },
   },
 };
@@ -58,10 +61,13 @@ graphQLServer.use(multer({
   storage,
 }).single('file'));
 
-graphQLServer.use('/graphql', bodyParser.json(), apolloExpress((req) => ({
-  schema,
-  rootValue: req,
-})
+graphQLServer.use('/graphql', bodyParser.json({ limit: '50mb' }), apolloExpress((req) => {
+  console.log(req.body);
+  return {
+    schema,
+    rootValue: req,
+  };
+}
 ));
 
 graphQLServer.use('/graphiql', graphiqlExpress({
