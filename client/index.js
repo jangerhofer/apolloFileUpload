@@ -7,6 +7,15 @@ import { ApolloProvider } from 'react-apollo';
 import App from './app';
 
 const networkInterface = createNetworkInterface('/graphql');
+
+// Use middleware to append the file to the post request somehow
+networkInterface.use([{
+  applyMiddleware(req, next) {
+    console.log(req);
+    next();
+  },
+}]);
+
 const client = new ApolloClient({
   networkInterface,
 });
