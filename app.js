@@ -1,9 +1,9 @@
-import { apolloExpress, graphiqlExpress } from 'apollo-server'
+import { apolloExpress, graphiqlExpress } from 'apollo-server';
 import { makeExecutableSchema } from 'graphql-tools';
-import multer from 'multer'
-import express from 'express'
-import bodyParser from 'body-parser'
-import fs from 'fs'
+import multer from 'multer';
+import express from 'express';
+import bodyParser from 'body-parser';
+import fs from 'fs';
 
 // Create schema
 const typeDefs = `
@@ -29,43 +29,43 @@ schema {
   query : RootQuery
   mutation : RootMutation
 }
-`
+`;
 
 const resolvers = {
-    RootMutation: {
-        uploadFile: (root, args, context) => {
+  RootMutation: {
+    uploadFile: (root, args, context) => {
             // Do something with root.file.buffer here
             // e.g. fs.writeFile(args.fileSaveName, root.file.buffer)
 
             // Return file metdata
-            return root.file
-        }
-    }
-}
+      return root.file;
+    },
+  },
+};
 
 const schema = makeExecutableSchema({
-    typeDefs,
-    resolvers
-})
+  typeDefs,
+  resolvers,
+});
 
-var app = express()
-app.use(bodyParser.json())
+var app = express();
+app.use(bodyParser.json());
 
 // Configure multer to accept a single file per post
 const storage = multer.memoryStorage();
 app.use(multer({
-    storage
+  storage,
 }).single('file'));
 
 app.use('/graphql', apolloExpress((req) => {
-    return {
-        schema,
-        rootValue: req
-    }
-}))
-
-app.use('/graphiql', graphiqlExpress({
-    endpointURL: '/graphql',
+  return {
+    schema,
+    rootValue: req,
+  };
 }));
 
-app.listen(3000)
+app.use('/graphiql', graphiqlExpress({
+  endpointURL: '/graphql',
+}));
+
+app.listen(3000);
