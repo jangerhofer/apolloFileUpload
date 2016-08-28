@@ -17,22 +17,25 @@ type fileMetadata {
   size : Int
 }
 
-type RootQuery {
-  test : String
+type Query {
+  randomNum : Int
 }
 
-type RootMutation {
+type Mutation {
   uploadFile(fileSaveName : String) : fileMetadata
 }
 
 schema {
-  query : RootQuery
-  mutation : RootMutation
+  query : Query
+  mutation : Mutation
 }
 `;
 
 const resolvers = {
-  RootMutation: {
+  Query: {
+    randomNum: () => Math.floor((Math.random() * 100) + 1),
+  },
+  Mutation: {
     uploadFile: (root, args) => {
       // Do something with root.file.buffer here
       // e.g. fs.writeFile(args.fileSaveName, root.file.buffer)
